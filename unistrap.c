@@ -27,6 +27,7 @@ static const char *kernel_path = NULL;
  * on top of the payloads
  *
  * @hdr_size:       Size of header
+ * @sector_count:   Total number of sectors in image
  * @bootstrap_off:  Offset of bootstrap payload
  * @bootstrap_size: Size of bootstrap payload
  * @kernel_off:     Offset of kernel payload
@@ -34,6 +35,7 @@ static const char *kernel_path = NULL;
  */
 struct image_header {
     uint16_t hdr_size;
+    uint16_t sector_count;
     off_t bootstrap_off;
     size_t bootstrap_size;
     off_t kernel_off;
@@ -133,6 +135,11 @@ generate(void)
     lseek(k_fd, 0, SEEK_SET);
     hdr.bootstrap_size = k_sz;
     hdr.bootstrap_off = MBR_END_OFFSET + bs_sz;
+
+    /* Prepare the header size */
+    hdr.sector_count = hdr.hdr_size + k_sz + bs_sz;
+    hdr.sector_count = ALIGN_UP(hdr.sector_count, SECTOR_SIZE);
+    hdr.sector_count /= SECTOR_SIZE;
 
     write(out_fd, &hdr, sizeof(hdr));
     if (output_append(out_fd, bs_fd, bs_sz) < 0) {
