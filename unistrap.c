@@ -26,12 +26,14 @@ static const char *kernel_path = NULL;
  * Represents the image header that exists
  * on top of the payloads
  *
+ * @hdr_size:       Size of header
  * @bootstrap_off:  Offset of bootstrap payload
  * @bootstrap_size: Size of bootstrap payload
  * @kernel_off:     Offset of kernel payload
  * @kernel_size:    size of kernel payload
  */
 struct image_header {
+    uint16_t hdr_size;
     off_t bootstrap_off;
     size_t bootstrap_size;
     off_t kernel_off;
@@ -117,6 +119,8 @@ generate(void)
         close(k_fd);
         return -1;
     }
+
+    hdr.hdr_size = sizeof(hdr);
 
     /* Initialize the bootstrap part of header */
     bs_sz = lseek(bs_fd, 0, SEEK_END);
